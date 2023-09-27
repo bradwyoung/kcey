@@ -5,12 +5,11 @@ on:
         branches: [ master ]
     pull_request:
         branches: [ master ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:            
-    - uses: actions/checkout@v2
+    steps:
+    - uses: actions/checkout@v3
     - uses: azure/login@v1
       with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -18,17 +17,16 @@ jobs:
     - name: Upload to blob storage
       uses: azure/CLI@v1
       with:
-        azcliversion: 2.53.0
         inlineScript: |
-            az storage blob upload-batch --account-name kcey -d '$web' -s .
+            az storage blob upload-batch --account-name kcey --auth-mode key -d '$web' -s .
     - name: Purge CDN endpoint
       uses: azure/CLI@v1
       with:
-        azcliversion: 2.0.72
         inlineScript: |
-            az cdn endpoint purge --content-paths  "/*" --profile-name kceycdn --name kceywebsite --resource-group KCEY
+           az cdn endpoint purge --content-paths  "/*" --profile-name kceycdn --name kceywebsite --resource-group KCEY
 
-  # Azure logout 
+  # Azure logout
     - name: logout
       run: |
             az logout
+      if: always()
